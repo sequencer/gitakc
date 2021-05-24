@@ -29,8 +29,10 @@ object gitakc {
         c.userMap.get(username) match {
           case Some(githubUsername) => {
             System.err.println("downloading!")
-            val keys = requests.get(s"https://github.com/$githubUsername.keys", check = false).text()
-            os.write.over(userCache, keys)
+            import sttp.client3.quick._
+            // Bug from ScalaNative https://github.com/scala-native/scala-native/issues/2135
+            // Will fix by https://github.com/scala-native/scala-native/pull/2141
+            os.write.over(userCache, quickRequest.get(uri"https://github.com/$githubUsername.keys").send(backend).body)
           }
           case None =>
         }

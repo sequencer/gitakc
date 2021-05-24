@@ -12,23 +12,23 @@ object gitakc extends Module {
 
   class GeneralJVM(val crossScalaVersion: String) extends GeneralModule with ScalafmtModule {
     def scalaVersion = crossScalaVersion
-
+    def prependShellScript = "#!/bin/sh\n" ++ super.prependShellScript()
     override def ivyDeps = super.ivyDeps() ++ Agg(
       ivy"com.lihaoyi::upickle:1.3.15",
       ivy"com.lihaoyi::os-lib:0.7.7",
-      ivy"com.lihaoyi::requests:0.6.9",
+      ivy"com.softwaremill.sttp.client3::core:3.3.4"
     )
   }
 
   class GeneralNative(val crossScalaVersion: String) extends GeneralModule with ScalaNativeModule {
     def scalaVersion = crossScalaVersion
     def scalaNativeVersion = "0.4.0"
-    def releaseMode = ReleaseMode.ReleaseFast
-    def nativeLTO = LTO.Thin
+    def releaseMode = ReleaseMode.ReleaseFull
+    def nativeLTO = LTO.Full
     override def ivyDeps = super.ivyDeps() ++ Agg(
       ivy"com.lihaoyi::upickle::1.3.15",
       ivy"com.lihaoyi::os-lib::0.7.7",
-      ivy"com.lihaoyi::requests::0.6.9",
+      ivy"com.softwaremill.sttp.client3::core::3.3.4",
     )
   }
 
