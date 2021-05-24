@@ -1,0 +1,7 @@
+{
+  "ttl": "600",
+  "userMap": {
+    "sequencer": "sequencer"
+  },
+  "cacheFolder": "/tmp/gitakc"
+}
