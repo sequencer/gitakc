@@ -6,7 +6,7 @@ Only need a system user add his/her ssh public key to GitHub, and create a map f
 {
   "ttl": "600",
   "userMap": {
-    "sequencer": "sequencer"
+    "sequencer": ["sequencer"]
   },
   "cacheFolder": "/tmp/gitakc"
 }

@@ -1,4 +1,6 @@
-case class Config(ttl: BigInt, userMap: Map[String, String], cacheFolder: String)
+import scala.collection.parallel.CollectionConverters._
+
+case class Config(ttl: BigInt, userMap: Map[String, Seq[String]], cacheFolder: String)
 
 object Config {
   implicit val rw: upickle.default.ReadWriter[Config] = upickle.default.macroRW
@@ -27,12 +29,17 @@ object gitakc {
         (System.currentTimeMillis - os.mtime(userCache)) > (c.ttl * 1000)
       )
         c.userMap.get(username) match {
-          case Some(githubUsername) => {
+          case Some(githubUsernames) => {
             System.err.println("downloading!")
             import sttp.client3.quick._
             // Bug from ScalaNative https://github.com/scala-native/scala-native/issues/2135
             // Will fix by https://github.com/scala-native/scala-native/pull/2141
-            os.write.over(userCache, quickRequest.get(uri"https://github.com/$githubUsername.keys").send(backend).body)
+            os.write.over(
+              userCache,
+              githubUsernames.par
+                .map(u => quickRequest.get(uri"https://github.com/$u.keys").send(backend).body)
+                .mkString("\n")
+            )
           }
           case None =>
         }
