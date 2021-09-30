@@ -21,29 +21,32 @@ object gitakc {
     val userCache = cacheDir / username
     // create cache dir.
     os.makeDir.all(cacheDir)
-    if (c.userMap.keys.toSet.contains(username)) {
-      if (
-        // no cache but user in the user map
-        (!os.isFile(userCache)) ||
-        // cache ttl timeout
-        (System.currentTimeMillis - os.mtime(userCache)) > (c.ttl * 1000)
-      )
-        c.userMap.get(username) match {
-          case Some(githubUsernames) => {
-            System.err.println("downloading!")
-            import sttp.client3.quick._
-            // Bug from ScalaNative https://github.com/scala-native/scala-native/issues/2135
-            // Will fix by https://github.com/scala-native/scala-native/pull/2141
-            os.write.over(
-              userCache,
-              githubUsernames.par
-                .map(u => quickRequest.get(uri"https://github.com/$u.keys").send(backend).body)
-                .mkString("\n")
-            )
-          }
-          case None =>
+    c.userMap.get(username) match {
+      case Some(githubUsernames) => {
+        // update user cache.
+        if (
+          // no cache but user in the user map
+          (!os.isFile(userCache)) ||
+          // cache ttl timeout
+          (System.currentTimeMillis - os.mtime(userCache)) > (c.ttl * 1000)
+        ) {
+          System.err.println("downloading!")
+          import sttp.client3.quick._
+          // Bug from ScalaNative https://github.com/scala-native/scala-native/issues/2135
+          // fixed by https://github.com/scala-native/scala-native/pull/2141
+          // wait for next release
+          os.write.over(
+            userCache,
+            githubUsernames.par
+              .map(u => quickRequest.get(uri"https://github.com/$u.keys").send(backend).body)
+              .mkString("\n")
+          )
         }
-      System.out.println(os.read(userCache))
+        // print to stdout, ssh will read this.
+        System.out.println(os.read(userCache))
+      }
+      case None =>
+        // Do nothing.
     }
   }
 }
