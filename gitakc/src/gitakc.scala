@@ -1,5 +1,3 @@
-import scala.collection.parallel.CollectionConverters._
-
 case class Config(ttl: BigInt, userMap: Map[String, Seq[String]], cacheFolder: String)
 
 object Config {
@@ -32,12 +30,9 @@ object gitakc {
         ) {
           System.err.println("downloading!")
           import sttp.client3.quick._
-          // Bug from ScalaNative https://github.com/scala-native/scala-native/issues/2135
-          // fixed by https://github.com/scala-native/scala-native/pull/2141
-          // wait for next release
           os.write.over(
             userCache,
-            githubUsernames.par
+            githubUsernames
               .map(u => quickRequest.get(uri"https://github.com/$u.keys").send(backend).body)
               .mkString("\n")
           )

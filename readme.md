@@ -18,17 +18,19 @@ AuthorizedKeysCommand gitakc
 It will automatically download and cache(for `ttl` seconds) user's public keys, and authorize for user.
 
 ### Usage
-```
-# Compile
+If you love JVM, use script below:
+```bash
+# Compile with JVM
 mill -i "gitakc.jvm[3.0.0].assembly"
 # Copy to local binary path
 cp out/gitakc/jvm/3.0.0/assembly/dest/out.jar /usr/local/bin/gitakc
+# Compile with Native
+mill -i "gitakc.native[2.13.8].nativeLink"
+# Copy to local binary path
+cp out/gitakc/native/2.13.8/nativeLink/dest/out /usr/local/bin/gitakc
 # Copy example(and edit)
 cp gitakc/resources/test.json /etc/gitakc.json
 vim /etc/gitakc.json
 # Restart sshd
 systemctl restat sshd
 ```
-
-### NOTICE
-Scala Native is not work since scala-native/scala-native#2135 and will be fixed at scala-native/scala-native#2141
