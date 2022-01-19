@@ -22,7 +22,7 @@ It will automatically download and cache(for `ttl` seconds) user's public keys, 
 # Compile
 mill -i "gitakc.jvm[3.0.0].assembly"
 # Copy to local binary path
-cp out/gitakc/jvm/3.0.0/assembly/dest/out.jar /usr/local/bin/gitakc
+p out/gitakc/jvm/3.0.0/assembly.dest/out.jar /usr/local/bin/gitakc
 # Copy example(and edit)
 cp gitakc/resources/test.json /etc/gitakc.json
 vim /etc/gitakc.json
