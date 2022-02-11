@@ -8,6 +8,9 @@ object v {
   val upickle = ivy"com.lihaoyi::upickle:1.4.4"
   val oslib = ivy"com.lihaoyi::os-lib:0.8.1"
   val sttp = ivy"com.softwaremill.sttp.client3::core:3.3.18"
+  val upickleNative = ivy"com.lihaoyi::upickle::1.4.4"
+  val oslibNative = ivy"com.lihaoyi::os-lib::0.8.1"
+  val sttpNative = ivy"com.softwaremill.sttp.client3::core::3.3.18"
 }
 object gitakc extends Module {
   object jvm extends Cross[GeneralJVM]("2.12.13", "2.13.8", "3.0.0")
@@ -23,9 +26,10 @@ object gitakc extends Module {
   class GeneralNative(val crossScalaVersion: String) extends GeneralModule with ScalaNativeModule {
     def scalaVersion = crossScalaVersion
     def scalaNativeVersion = "0.4.3"
-    def releaseMode = ReleaseMode.ReleaseFast
-    def nativeLTO = LTO.Thin
-    override def ivyDeps = super.ivyDeps() ++ Agg(v.upickle, v.oslib, v.sttp)
+    def releaseMode = ReleaseMode.ReleaseFull
+    def nativeLTO = LTO.Full
+    def nativeLinkingOptions = T {super.nativeLinkingOptions() ++ Seq("-fuse-ld=lld")}
+    override def ivyDeps = super.ivyDeps() ++ Agg(v.upickleNative, v.oslibNative, v.sttpNative)
   }
 
   trait GeneralModule extends ScalaModule with PublishModule {
