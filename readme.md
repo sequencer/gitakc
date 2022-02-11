@@ -8,6 +8,7 @@ Only need a system user add his/her ssh public key to GitHub, and create a map f
   "userMap": {
     "sequencer": ["sequencer"]
   },
+  "userMapUrl": "url that contains additional users",
   "cacheFolder": "/tmp/gitakc"
 }
 ```

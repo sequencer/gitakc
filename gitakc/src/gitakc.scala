@@ -1,12 +1,17 @@
-case class Config(ttl: BigInt, userMap: Map[String, Seq[String]], cacheFolder: String)
+case class Config(ttl: BigInt, userMapUrl: String = "", userMap: Map[String, Seq[String]], cacheFolder: String)
+case class UserMap(userMap: Map[String, Seq[String]])
 
 object Config {
   implicit val rw: upickle.default.ReadWriter[Config] = upickle.default.macroRW
 }
 
+object UserMap {
+  implicit val rw: upickle.default.ReadWriter[UserMap] = upickle.default.macroRW
+}
 object gitakc {
+  import sttp.client3.quick._
   def main(args: Array[String]): Unit = {
-    implicit val c: Config = upickle.default.read[Config](
+    val c: Config = upickle.default.read[Config](
       os.read(
         sys.env
           .get("GITAKC_CONFIG")
@@ -14,12 +19,18 @@ object gitakc {
           .getOrElse(os.root / "etc" / "gitakc.json")
       )
     )
+    val userMap =
+      if (c.userMapUrl.nonEmpty)
+        c.userMap ++ upickle.default.read[UserMap](quickRequest.get(uri"${c.userMapUrl}").send(backend).body).userMap
+      else
+        c.userMap
+    println(userMap)
     val cacheDir = os.Path(c.cacheFolder)
     val username = args(0)
     val userCache = cacheDir / username
     // create cache dir.
     os.makeDir.all(cacheDir)
-    c.userMap.get(username) match {
+    userMap.get(username) match {
       case Some(githubUsernames) => {
         // update user cache.
         if (
@@ -29,7 +40,6 @@ object gitakc {
           (System.currentTimeMillis - os.mtime(userCache)) > (c.ttl * 1000)
         ) {
           System.err.println("downloading!")
-          import sttp.client3.quick._
           os.write.over(
             userCache,
             githubUsernames
@@ -41,7 +51,7 @@ object gitakc {
         System.out.println(os.read(userCache))
       }
       case None =>
-        // Do nothing.
+      // Do nothing.
     }
   }
 }
